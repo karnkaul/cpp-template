@@ -4,7 +4,8 @@
 # Requirements:
 #  - clang-format
 
-EXCLUDE=*lib/*
+EXCLUDE0=*ext/*
+EXCLUDE1=*lib/*
 BUILD=*out/*
 PATTERN0="*.hpp"
 PATTERN1="*.cpp"
@@ -16,7 +17,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 . ./os.sh
 cd "$THISDIR"
 
-FILES=$(find . -not -path "$EXCLUDE" -not -path "$BUILD" \( -name $PATTERN0 -o -name $PATTERN1 \))
+FILES=$(find . -not -path "$EXCLUDE0" -not -path "$EXCLUDE1" -not -path "$BUILD" \( -name $PATTERN0 -o -name $PATTERN1 \))
 COUNT=$(echo -e "$FILES" | wc -l)
 echo -e "\nFiles:\n\n$FILES\n"
 
