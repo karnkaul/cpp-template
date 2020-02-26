@@ -14,6 +14,9 @@ if(CMAKE_CONFIGURATION_TYPES)
 	set(BUILD_CONFIG "Multi-config")
 endif()
 message(STATUS "[${CMAKE_SYSTEM_PROCESSOR}] [${PLATFORM}] [${CMAKE_GENERATOR}] [${CMAKE_CXX_COMPILER_ID}] [${BUILD_CONFIG}]")
+if(CI_BUILD)
+	message(STATUS "== CI Build ==")
+endif()
 
 # Git operations
 set(GIT_COMMIT_HASH "[unknown]")
