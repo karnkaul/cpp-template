@@ -1,0 +1,44 @@
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
+set(APP_VERSION "1.0.0.0" CACHE STRING "Application Version" FORCE)
+project(cpp-template VERSION ${APP_VERSION})
+
+# Includes
+include(tools/.cmake/platform.cmake)
+include(tools/.cmake/utils.cmake)
+
+# Header text
+set(BUILD_CONFIG ${CMAKE_BUILD_TYPE})
+if(CMAKE_CONFIGURATION_TYPES)
+	set(BUILD_CONFIG "Multi-config")
+endif()
+message(STATUS "[${CMAKE_SYSTEM_PROCESSOR}] [${PLATFORM}] [${CMAKE_GENERATOR}] [${CMAKE_CXX_COMPILER_ID}] [${BUILD_CONFIG}]")
+
+# Git operations
+set(GIT_COMMIT_HASH "[unknown]")
+find_package(Git QUIET)
+if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
+	get_git_commit_hash(GIT_COMMIT_HASH)
+	option(GIT_UPDATE_SUBMODULES "Init/Update submodules during generation" ON)
+	if(GIT_UPDATE_SUBMODULES)
+		update_git_submodules(1)
+	endif()
+endif()
+
+# Constants
+set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH} CACHE STRING "Commit hash" FORCE)
+
+# Executable
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.*pp"
+)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
+add_target_compile_definitions(${PROJECT_NAME} CPP_TEMPLATE)
+add_target_compile_options(${PROJECT_NAME} PRIVATE)
+add_target_link_options(${PROJECT_NAME})
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+if(W_MSBUILD)
+	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+endif()
