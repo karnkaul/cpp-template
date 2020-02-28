@@ -4,7 +4,7 @@
 # Requirements:
 #  - clang-format
 
-EXCLUDE=*lib/*
+EXCLUDE=*ext/*
 BUILD=*out/*
 PATTERN0="*.h*"
 [ "$1" == "-r" ] && RUN=TRUE
@@ -16,23 +16,29 @@ cd "$THISDIR"
 
 FILES=$(find . -not -path "$EXCLUDE" -not -path "$BUILD" \( -name $PATTERN0 \))
 COUNT=$(echo -e "$FILES" | wc -l)
+let COUNT=$COUNT-1
 echo -e "== Checking $COUNT headers for:\n\t[#pragma once]\n"
 
 IDX=0
+ERR=false
 for FILE in ${FILES}; do
 	let IDX=$IDX+1
 	while read -r LINE; do
-		[[ "$LINE" == *"*/" ]] && COMMENTED=FALSE
-		[[ "$LINE" == "/*"* ]] && COMMENTED=TRUE
-		if [[ "$COMMENTED" != "TRUE" ]]; then
+		[[ "$LINE" == *"*/" ]] && COMMENTED=false
+		[[ "$LINE" == "/*"* ]] && COMMENTED=true
+		if [[ "$COMMENTED" != "true" ]]; then
 			[[ -z "${LINE// }" || "$LINE" == *"*/" || "$LINE" == "//"* ]] && continue
 			if [[ "$LINE" != "#pragma once" ]]; then
 				echo -e "  $IDX. ERROR! $FILE missing '#pragma once'! [ERR]"
+				ERR=true
 				break
 			fi
-			echo "  $IDX. $FILE [OK]"
 			break
 		fi
 	done < $FILE
 done
+if [[ $ERR == "false" ]]; then
+	echo -e "  All OK\n"
+fi
+
 exit

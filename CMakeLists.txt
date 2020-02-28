@@ -5,8 +5,8 @@ set(APP_VERSION "1.0.0.0" CACHE STRING "Application Version" FORCE)
 project(cpp-template VERSION ${APP_VERSION})
 
 # Includes
-include(tools/.cmake/platform.cmake)
-include(tools/.cmake/utils.cmake)
+include(.cmake/platform.cmake)
+include(.cmake/utils.cmake)
 
 # Header text
 set(BUILD_CONFIG ${CMAKE_BUILD_TYPE})
@@ -38,9 +38,6 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
 add_executable(${PROJECT_NAME} ${SOURCES})
-add_target_compile_definitions(${PROJECT_NAME} CPP_TEMPLATE)
-add_target_compile_options(${PROJECT_NAME} PRIVATE)
-add_target_link_options(${PROJECT_NAME})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 if(W_MSBUILD)
 	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})

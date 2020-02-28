@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script sets some env vars based on OS, shell, etc.
-# Note: script is meant to be sourced, not called.
+# Note: script is meant to be sourced, not called; it does not exit
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	IS_MACOSX=TRUE
