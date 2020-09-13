@@ -1,4 +1,5 @@
 macro(get_git_commit_hash OUTPUT_VAR)
+	set(${OUTPUT_VAR} "[unknown]")
 	execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		OUTPUT_VARIABLE ${OUTPUT_VAR}
@@ -32,17 +33,6 @@ function(unzip_archive ARCHIVE_NAME SUBDIR)
 	)
 endfunction()
 
-function(configure_file_src_to_bin SRC DEST)
-	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${SRC}")
-		set(OUTFILE "${CMAKE_CURRENT_BINARY_DIR}/${DEST}")
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${SRC}" "${OUTFILE}")
-		list(APPEND SOURCES "${OUTFILE}")
-		source_group(TREE "${CMAKE_CURRENT_BINARY_DIR}" FILES "${OUTFILE}")
-	else()
-		message(WARNING "Required file not present to configure: ${SRC}")
-	endif()
-endfunction()
-
 function(set_output_directory TARGET_NAME DIRECTORY_PATH)
 	set_target_properties(${TARGET_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${DIRECTORY_PATH}")
 	set_target_properties(${TARGET_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${DIRECTORY_PATH}")
@@ -53,17 +43,4 @@ function(set_output_directory TARGET_NAME DIRECTORY_PATH)
 		set_target_properties(${TARGET_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${CONFIG} "${DIRECTORY_PATH}")
 		set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${CONFIG} "${DIRECTORY_PATH}")
 	endforeach()
-endfunction()
-
-function(add_target_compile_definitions TARGET_NAME PREFIX)
-	target_compile_definitions(${TARGET_NAME} PRIVATE
-		_UNICODE
-		$<$<NOT:$<CONFIG:Debug>>:
-			NDEBUG
-			${PREFIX}_RELEASE
-		>
-		$<$<CONFIG:Debug>:
-			${PREFIX}_DEBUG
-		>
-	)
 endfunction()
