@@ -1,10 +1,16 @@
-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)	# Don't let OPTION erase above non-cache variables
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
+set(CMAKE_CXX_EXTENSIONS OFF CACHE INTERNAL "" FORCE)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set(APP_VERSION "1.0.0.0" CACHE STRING "Application Version" FORCE)
 project(cpp-template VERSION ${APP_VERSION})
 
 # Includes
+include(CheckPIESupported)
+check_pie_supported()
 include(cmake/platform.cmake)
 include(cmake/utils.cmake)
 
