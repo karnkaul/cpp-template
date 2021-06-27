@@ -1,4 +1,4 @@
-version: "0.1.0.0-{build}"
+version: "@PROJECT_VERSION@-{build}"
 environment:
   matrix:
     - job_name: Windows x64
@@ -15,7 +15,7 @@ for:
       only:
         - job_name: Windows x64
     build:
-      project: out/cpp-template.sln
+      project: out/@PROJECT_NAME@.sln
       parallel: true
       verbosity: minimal
   - matrix:

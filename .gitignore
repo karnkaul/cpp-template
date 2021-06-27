@@ -2,6 +2,8 @@
 **/.vscode/*
 build/*
 out/*
+.cache
+.DS_Store
 
 CMakeSettings.json
-.editorconfig
+compile_commands.json
