@@ -58,13 +58,3 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}::interface)					# 
 if(W_MSBUILD)
 	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})	# set startup project for VS
 endif()
-
-if(is_root_project)
-	if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json")
-		message(STATUS "Copying compile_commands.json")
-		file(COPY "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" DESTINATION "${CMAKE_SOURCE_DIR}")
-	endif()
-	# appveyor build file
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml.in" "${CMAKE_SOURCE_DIR}/.appveyor.yml")
-endif()
-
