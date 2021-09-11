@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
+enable_language(CXX)
+
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)					# don't let OPTION erase non-cache variables
-set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")			# ensure CMAKE_BUILD_TYPE is not empty
 set(CMAKE_CXX_EXTENSIONS OFF CACHE INTERNAL "" FORCE)	# disable compiler extensions
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)					# enable PIC
+set(CMAKE_DEBUG_POSTFIX "-d")
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)			# ensure CMAKE_BUILD_TYPE is not empty
+endif()
 
 # project parameters
 set(project_name cpp-template)
 set(project_version "0.1.0.0")
+set(project_version_name cpp_template_version) # name of variable in generated header
 set(cxx_standard cxx_std_17)
 
 project(${project_name} VERSION "${project_version}")
@@ -20,12 +26,14 @@ endif()
 # includes
 include(CheckPIESupported)
 check_pie_supported()
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 include(cmake/platform.cmake)	# set up helper cache variables
 include(cmake/utils.cmake)		# functions for git operations etc
 
 # git operations
 find_package(Git QUIET)
-if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
+if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
 	git_get_commit_hash(${PROJECT_NAME}_GIT_COMMIT_HASH)	# store commit hash in ${PROJECT_NAME}_GIT_COMIT_HASH
 	if(is_root_project)
 		option(GIT_UPDATE_SUBMODULES "Init/Update submodules during generation" ${is_root_project})
@@ -50,11 +58,16 @@ if(is_root_project AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	message(STATUS "Exporting compile commands")
 endif()
 
+# version
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/version.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/generated/version.hpp")
+
 # executable
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.?pp")		# grab all *.?pp files
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})							# add to source group (for IDEs)
-add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}::interface)					# apply interface library options
+add_executable(${PROJECT_NAME})
+target_sources(${PROJECT_NAME} PRIVATE src/main.cpp)
+target_source_group(${PROJECT_NAME})
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}::options)					# apply interface library options
+
 if(W_MSBUILD)
-	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})	# set startup project for VS
+	set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})	# set startup project for VS
 endif()

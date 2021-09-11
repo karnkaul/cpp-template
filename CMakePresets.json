@@ -1,11 +1,18 @@
 {
-	"version": 1,
+	"version": 2,
 	"cmakeMinimumRequired": {
 		"major": 3,
-		"minor": 19,
+		"minor": 20,
 		"patch": 0
 	},
 	"configurePresets": [
+		{
+			"name": "default",
+			"displayName": "Default",
+			"description": "Default build configuration using Ninja",
+			"binaryDir": "out/default",
+			"generator": "Ninja"
+		},
 		{
 			"name": "ninja-db",
 			"displayName": "Debug",
@@ -85,6 +92,24 @@
 					"value": "Release"
 				}
 			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "default",
+			"configurePreset": "default"
+		},
+		{
+			"name": "ninja-db",
+			"configurePreset": "ninja-db"
+		},
+		{
+			"name": "ninja-rl",
+			"configurePreset": "ninja-rl"
+		},
+		{
+			"name": "ninja-rw",
+			"configurePreset": "ninja-rw"
 		}
 	]
 }

@@ -25,6 +25,7 @@ Sets up a minimalist C++17 CMake executable project with a few basic add-ons.
 1. Modify the `project parameters` section in `CMakeLists.txt`
    1. `project_name`: name to use for root project and prefix for interface library
    1. `project_version`: passed to `project()`
+   1. `project_version_name`: name of variable in generated header
    1. `cxx_standard`: compile feature on interface library
 1. Make any other changes if desired
 1. Configure
