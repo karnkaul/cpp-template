@@ -9,7 +9,7 @@ configuration:
   - Release
 before_build:
   - cmd: cmake . -B out || exit 1
-  - sh: cmake -S . --preset=ninja-rl || exit 1
+  - sh: cp cmake/CMakePresets.json .; cmake -S . --preset=nc-release || exit 1
 for:
   - matrix:
       only:
@@ -22,7 +22,7 @@ for:
       only:
         - job_name: Linux x64
     build_script:
-      - sh: echo "== Building Linux $CONFIGURATION ==" && cmake --build out/rl -v || exit 1
+      - sh: echo "== Building Linux $CONFIGURATION ==" && cmake --build --preset nc-release -v || exit 1
 test_script:
   - sh: cd out/rl; ctest || exit 1
   - cmd: |
