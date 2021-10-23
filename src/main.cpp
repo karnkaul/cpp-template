@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string_view>
-#include <version.hpp>
+#include <app_version.hpp>
 
 namespace {
 std::ostream& format(std::ostream& out_str, std::string_view fmt) { return out_str << fmt; }
