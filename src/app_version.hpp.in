@@ -1,3 +1,6 @@
 #pragma once
+#include <string_view>
 
-constexpr char const @project_version_name@[] = "@project_version@";
+namespace cpp_template {
+constexpr std::string_view version = "@PROJECT_VERSION@";
+}

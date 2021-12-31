@@ -1,6 +1,9 @@
-# C++17 CMake Project Template (Executable)
+# C++20 CMake Project Template (Executable)
 
-Sets up a minimalist C++17 CMake executable project with a few basic add-ons.
+Sets up a minimalist C++20 CMake executable project with a few basic add-ons.
+
+<!-- Replace/remove this badge -->
+[![Build status](https://ci.appveyor.com/api/projects/status/o7n74l9iens992qy?svg=true)](https://ci.appveyor.com/project/karnkaul/cpp-template)
 
 ## Features
 
@@ -24,8 +27,8 @@ Sets up a minimalist C++17 CMake executable project with a few basic add-ons.
 1. Clone repo / use as template
 1. Modify the `project parameters` section in `CMakeLists.txt`
    1. `project_name`: name to use for root project and prefix for interface library
-   1. `project_version`: passed to `project()`
-   1. `project_version_name`: name of variable in generated header
+   1. `${project_name}_version_file`: version file to configure (optional)
+   1. `${project_name}_version`, `${project_name}_soversion`: used for versioning
    1. `cxx_standard`: compile feature on interface library
 1. Make any other changes if desired
 1. Configure

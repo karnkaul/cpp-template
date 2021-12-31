@@ -7,9 +7,14 @@ environment:
       appveyor_build_worker_image: Ubuntu
 configuration:
   - Release
+install:
+  - sh: |
+      [ "$SKIP_LINUX" == "true" ] && echo "-- Skipping Linux --" && exit
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+      echo "== Installing dependencies ==" && sudo apt -qq update && sudo apt -qq install -y gcc-10 g++-10
 before_build:
-  - cmd: cmake . -B out || exit 1
-  - sh: cp cmake/CMakePresets.json .; cmake -S . --preset=nc-release || exit 1
+  - cmd: cmake . -B out -DCMAKE_INSTALL_PREFIX=./install || exit 1
+  - sh: cp cmake/CMakePresets.json .; cmake -S . --preset=nc-release -DCMAKE_INSTALL_PREFIX=./install || exit 1
 for:
   - matrix:
       only:
@@ -23,6 +28,9 @@ for:
         - job_name: Linux x64
     build_script:
       - sh: echo "== Building Linux $CONFIGURATION ==" && cmake --build --preset nc-release -v || exit 1
+after_build:
+  - cmd: cmake --install out
+  - sh: cmake --install out/rl
 test_script:
   - sh: cd out/rl; ctest || exit 1
   - cmd: |

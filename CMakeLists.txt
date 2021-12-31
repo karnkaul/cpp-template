@@ -6,17 +6,29 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)					# don't let OPTION erase non-cache var
 set(CMAKE_CXX_EXTENSIONS OFF CACHE INTERNAL "" FORCE)	# disable compiler extensions
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)					# enable PIC
 set(CMAKE_DEBUG_POSTFIX "-d")
-if(NOT CMAKE_BUILD_TYPE)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "")
   set(CMAKE_BUILD_TYPE Debug)			# ensure CMAKE_BUILD_TYPE is not empty
 endif()
 
+# cmake-utils
+include(FetchContent)
+set(FETCHCONTENT_QUIET OFF)
+FetchContent_Declare(
+  cmake-utils
+  GIT_REPOSITORY https://github.com/karnkaul/cmake-utils
+  GIT_TAG v1.0.1
+)
+FetchContent_MakeAvailable(cmake-utils)
+FetchContent_GetProperties(cmake-utils)
+
 # project parameters
 set(project_name cpp-template)
-set(project_version "0.1.0.0")
-set(project_version_name cpp_template_version) # name of variable in generated header
-set(cxx_standard cxx_std_17)
+set(${project_name}_version_file app_version.hpp)
+set(${project_name}_version "1.0.0")
+set(${project_name}_soversion 1)
+set(cxx_standard cxx_std_20)
 
-project(${project_name} VERSION "${project_version}")
+project(${project_name} VERSION "${${project_name}_version}")
 set(is_root_project OFF)	# indicate if this is the top-level project
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set(is_root_project ON)
@@ -26,10 +38,8 @@ endif()
 # includes
 include(CheckPIESupported)
 check_pie_supported()
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
 include(cmake/platform.cmake)	# set up helper cache variables
-include(cmake/utils.cmake)		# functions for git operations etc
+include("${cmake-utils_SOURCE_DIR}/cmake-utils.cmake")
 
 # git operations
 find_package(Git QUIET)
@@ -60,25 +70,52 @@ if(is_root_project AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   message(STATUS "Exporting compile commands")
 endif()
 
-# version
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/app_version.hpp.in")
-  message(STATUS "Configuring ${CMAKE_CURRENT_SOURCE_DIR}/src/capo_version.hpp.in")
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/app_version.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/generated/app_version.hpp")
-endif()
-
 # appveyor
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml.in")
   message(STATUS "Configuring ${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml.in")
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml.in" "${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml")
 endif()
 
-# executable
+# executable / library
 add_executable(${PROJECT_NAME})
-target_sources(${PROJECT_NAME} PRIVATE src/main.cpp)
-target_source_group(${PROJECT_NAME})
-target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}::options)					# apply interface library options
+# add_library(${PROJECT_NAME})
+# add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${${PROJECT_NAME}_version})
+set_property(TARGET ${PROJECT_NAME} PROPERTY SOVERSION ${${PROJECT_NAME}_soversion})
+set_property(TARGET ${PROJECT_NAME} PROPERTY INTERFACE_${PROJECT_NAME}_MAJOR_VERSION ${${PROJECT_NAME}_soversion})
+set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPATIBLE_INTERFACE_STRING ${PROJECT_NAME}_MAJOR_VERSION)
+
+target_include_directories(${PROJECT_NAME} SYSTEM INTERFACE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+target_include_directories(${PROJECT_NAME} PRIVATE
+  include
+  src
+  "${CMAKE_CURRENT_BINARY_DIR}/include"
+)
+target_link_libraries(${PROJECT_NAME}
+  PUBLIC
+    ${PROJECT_NAME}::interface
+  PRIVATE
+    ${PROJECT_NAME}::options
+)
 
 if(W_MSBUILD)
   set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})	# set startup project for VS
 endif()
+
+target_sources(${PROJECT_NAME} PRIVATE src/main.cpp)
+target_source_group(TARGET ${PROJECT_NAME})
+
+# version
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/${${project_name}_version_file}.in")
+  configure_src_bin(
+    IN src/${${project_name}_version_file}.in 
+    OUT ${project_name}/${${project_name}_version_file}
+    TARGET ${project_name}
+  )
+endif()
+
+install_and_export_target(TARGET ${PROJECT_NAME})

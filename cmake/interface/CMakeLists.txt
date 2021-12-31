@@ -1,8 +1,12 @@
 project(${project_name}-interface)
 
+if("${cxx_standard}" STREQUAL "")
+  set(cxx_standard cxx_std_20)
+endif()
+
 # Interface
-add_library(${project_name}-interface INTERFACE)
-add_library(${project_name}::interface ALIAS ${project_name}-interface)
+add_library(interface INTERFACE)
+add_library(${project_name}::interface ALIAS interface)
 
 if(LINUX_GCC OR LINUX_CLANG OR WIN64_GCC OR WIN64_CLANG)
   set(gcc_like TRUE)	# indicates gcc-like compiler
@@ -10,15 +14,20 @@ else()
   set(gcc_like FALSE)
 endif()
 
-target_compile_definitions(${project_name}-interface INTERFACE $<$<BOOL:${MSVC_RUNTIME}>:WIN32_LEAN_AND_MEAN NOMINMAX _CRT_SECURE_NO_WARNINGS>)
-target_compile_features(${project_name}-interface INTERFACE ${cxx_standard})
+target_compile_definitions(interface INTERFACE $<$<BOOL:${MSVC_RUNTIME}>:WIN32_LEAN_AND_MEAN NOMINMAX _CRT_SECURE_NO_WARNINGS>)
+target_compile_features(interface INTERFACE ${cxx_standard})
 
 # options
-add_library(${project_name}-options INTERFACE)
-add_library(${project_name}::options ALIAS ${project_name}-options)
+add_library(options INTERFACE)
+add_library(${project_name}::options ALIAS options)
 
-target_compile_options(${project_name}-options INTERFACE
-  $<$<BOOL:${gcc_like}>:-Wall -Wextra -Werror=return-type $<$<NOT:$<CONFIG:Debug>>:-Werror>>
+target_compile_options(options INTERFACE
+  $<$<BOOL:${gcc_like}>:-Wall -Wextra -Wunused -Werror=return-type $<$<NOT:$<CONFIG:Debug>>:-Werror>>
   $<$<BOOL:${WIN64_MSBUILD}>:/MP $<$<NOT:$<CONFIG:Debug>>:/WX>>
 )
-target_link_libraries(${project_name}-options INTERFACE ${project_name}::interface)
+target_link_libraries(options INTERFACE ${project_name}::interface)
+
+install_targets(TARGETS interface options EXPORT ${PROJECT_NAME}-targets)
+install_export_package(EXPORT ${PROJECT_NAME}-targets NAMESPACE ${project_name} PACKAGE ${PROJECT_NAME})
+install_package_config(PACKAGE ${PROJECT_NAME})
+export_package_to_build_tree(PACKAGE ${PROJECT_NAME})
