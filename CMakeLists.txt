@@ -25,10 +25,10 @@ FetchContent_GetProperties(cmake-utils)
 set(project_name cpp-template)
 set(${project_name}_version_file app_version.hpp)
 set(${project_name}_version "1.0.0")
-set(${project_name}_soversion 1)
 set(cxx_standard cxx_std_20)
 
 project(${project_name} VERSION "${${project_name}_version}")
+set(${project_name}_soversion ${PROJECT_VERSION_MAJOR})
 set(is_root_project OFF)	# indicate if this is the top-level project
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set(is_root_project ON)
@@ -68,12 +68,6 @@ endif()
 if(is_root_project AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   message(STATUS "Exporting compile commands")
-endif()
-
-# appveyor
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml.in")
-  message(STATUS "Configuring ${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml.in")
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml.in" "${CMAKE_CURRENT_SOURCE_DIR}/.appveyor.yml")
 endif()
 
 # executable / library

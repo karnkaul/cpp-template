@@ -1,0 +1,31 @@
+name: ci
+on:
+  push:
+    tags-ignore: v*.*
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            install: choco install ninja
+          - os: ubuntu-latest
+            install: sudo apt install -yqq ninja-build
+    steps:
+      - uses: actions/checkout@v2
+      - name: install
+        shell: bash
+        run: ${{ matrix.install }}
+      - name: build-Release
+        shell: bash
+        run: |
+          cp cmake/CMakePresets.json .
+          cmake -DBUILD_DIR=build -DBUILD_CONFIG=Release -P cmake/build.cmake
+          cd build/Release && ctest
